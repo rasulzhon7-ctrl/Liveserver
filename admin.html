@@ -1,0 +1,939 @@
+<!DOCTYPE html>
+<html lang="tg">
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+
+<title>Weather Admin Panel</title>
+
+<style>
+
+*{
+    box-sizing:border-box;
+    margin:0;
+    padding:0;
+}
+
+body{
+    font-family:Arial,sans-serif;
+    background:#071426;
+    color:white;
+}
+
+/* SIDEBAR */
+
+.sidebar{
+    position:fixed;
+    left:0;
+    top:0;
+    bottom:0;
+
+    width:240px;
+
+    background:#0d2037;
+
+    padding:25px 15px;
+
+    border-right:1px solid #ffffff10;
+}
+
+.logo{
+    font-size:22px;
+    font-weight:bold;
+    margin-bottom:35px;
+    text-align:center;
+}
+
+.menu button{
+    width:100%;
+
+    border:0;
+    background:transparent;
+
+    color:#aebfd0;
+
+    padding:14px;
+
+    border-radius:12px;
+
+    text-align:left;
+
+    font-size:15px;
+
+    cursor:pointer;
+
+    margin-bottom:6px;
+}
+
+.menu button:hover,
+.menu button.active{
+    background:#55dfb020;
+    color:#55dfb0;
+}
+
+/* MAIN */
+
+.main{
+    margin-left:240px;
+    padding:25px;
+}
+
+/* TOP */
+
+.top{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+
+    margin-bottom:25px;
+}
+
+.top h1{
+    font-size:28px;
+}
+
+.admin-user{
+    background:#ffffff10;
+    padding:10px 15px;
+    border-radius:12px;
+}
+
+/* CARDS */
+
+.cards{
+    display:grid;
+
+    grid-template-columns:
+    repeat(4,1fr);
+
+    gap:15px;
+
+    margin-bottom:30px;
+}
+
+.card{
+    background:#102943;
+
+    border:1px solid #ffffff10;
+
+    border-radius:18px;
+
+    padding:20px;
+}
+
+.card-icon{
+    font-size:30px;
+}
+
+.card-number{
+    font-size:30px;
+
+    font-weight:bold;
+
+    margin-top:10px;
+}
+
+.card-name{
+    color:#91a9bd;
+
+    margin-top:5px;
+}
+
+/* SECTION */
+
+.section{
+    display:none;
+}
+
+.section.active{
+    display:block;
+}
+
+.section-title{
+    font-size:22px;
+    margin-bottom:15px;
+}
+
+/* TABLE */
+
+.table-box{
+    overflow-x:auto;
+
+    background:#102943;
+
+    border-radius:18px;
+
+    padding:10px;
+}
+
+table{
+    width:100%;
+
+    border-collapse:collapse;
+}
+
+th,
+td{
+    padding:15px;
+
+    text-align:left;
+
+    border-bottom:1px solid #ffffff10;
+}
+
+th{
+    color:#8fa9bd;
+}
+
+.delete{
+    border:0;
+
+    background:#ff5b5b20;
+
+    color:#ff7777;
+
+    padding:8px 12px;
+
+    border-radius:8px;
+
+    cursor:pointer;
+}
+
+/* ADD CITY */
+
+.form{
+    background:#102943;
+
+    border-radius:18px;
+
+    padding:20px;
+
+    display:grid;
+
+    grid-template-columns:
+    1fr 1fr 120px 120px auto;
+
+    gap:10px;
+}
+
+.form input{
+    height:45px;
+
+    border:0;
+
+    outline:none;
+
+    border-radius:10px;
+
+    background:#ffffff10;
+
+    color:white;
+
+    padding:0 12px;
+}
+
+.add{
+    border:0;
+
+    border-radius:10px;
+
+    background:#55dfb0;
+
+    color:#062033;
+
+    font-weight:bold;
+
+    cursor:pointer;
+}
+
+/* SETTINGS */
+
+.settings{
+    background:#102943;
+
+    border-radius:18px;
+
+    padding:20px;
+
+    max-width:600px;
+}
+
+.setting{
+    display:flex;
+
+    justify-content:space-between;
+
+    align-items:center;
+
+    padding:15px 0;
+
+    border-bottom:1px solid #ffffff10;
+}
+
+.setting button{
+    border:0;
+
+    padding:8px 15px;
+
+    border-radius:10px;
+
+    background:#55dfb0;
+
+    cursor:pointer;
+}
+
+/* MOBILE */
+
+@media(max-width:800px){
+
+    .sidebar{
+        position:relative;
+
+        width:100%;
+
+        height:auto;
+    }
+
+    .main{
+        margin-left:0;
+    }
+
+    .cards{
+        grid-template-columns:
+        1fr 1fr;
+    }
+
+    .form{
+        grid-template-columns:1fr;
+    }
+
+}
+
+</style>
+
+</head>
+
+<body>
+
+
+<!-- SIDEBAR -->
+
+<div class="sidebar">
+
+<div class="logo">
+🌤️ Weather Admin
+</div>
+
+
+<div class="menu">
+
+<button
+class="active"
+onclick="showSection('dashboard',this)">
+📊 Dashboard
+</button>
+
+<button
+onclick="showSection('cities',this)">
+🌍 Шаҳрҳо
+</button>
+
+<button
+onclick="showSection('map',this)">
+🗺️ Харита
+</button>
+
+<button
+onclick="showSection('users',this)">
+👥 Корбарон
+</button>
+
+<button
+onclick="showSection('settings',this)">
+⚙️ Танзимот
+</button>
+
+</div>
+
+</div>
+
+
+<!-- MAIN -->
+
+<div class="main">
+
+
+<div class="top">
+
+<h1 id="pageTitle">
+📊 Dashboard
+</h1>
+
+<div class="admin-user">
+👤 Admin
+</div>
+
+</div>
+
+
+<!-- DASHBOARD -->
+
+<div
+id="dashboard"
+class="section active">
+
+<div class="cards">
+
+<div class="card">
+
+<div class="card-icon">
+🌍
+</div>
+
+<div
+id="cityCount"
+class="card-number">
+0
+</div>
+
+<div class="card-name">
+Шаҳрҳо
+</div>
+
+</div>
+
+
+<div class="card">
+
+<div class="card-icon">
+🔎
+</div>
+
+<div
+id="searchCount"
+class="card-number">
+0
+</div>
+
+<div class="card-name">
+Ҷустуҷӯҳо
+</div>
+
+</div>
+
+
+<div class="card">
+
+<div class="card-icon">
+👥
+</div>
+
+<div class="card-number">
+0
+</div>
+
+<div class="card-name">
+Корбарон
+</div>
+
+</div>
+
+
+<div class="card">
+
+<div class="card-icon">
+📅
+</div>
+
+<div class="card-number">
+14
+</div>
+
+<div class="card-name">
+Рӯзи пешгӯӣ
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+
+<!-- CITIES -->
+
+<div
+id="cities"
+class="section">
+
+<h2 class="section-title">
+🌍 Идоракунии шаҳрҳо
+</h2>
+
+
+<div class="form">
+
+<input
+id="cityName"
+placeholder="Шаҳр">
+
+<input
+id="cityCountry"
+placeholder="Кишвар">
+
+<input
+id="cityLat"
+placeholder="Latitude">
+
+<input
+id="cityLon"
+placeholder="Longitude">
+
+<button
+class="add"
+onclick="addCity()">
+➕ Илова
+</button>
+
+</div>
+
+
+<br>
+
+
+<div class="table-box">
+
+<table>
+
+<thead>
+
+<tr>
+
+<th>Шаҳр</th>
+<th>Кишвар</th>
+<th>Latitude</th>
+<th>Longitude</th>
+<th></th>
+
+</tr>
+
+</thead>
+
+
+<tbody id="cityTable">
+
+</tbody>
+
+</table>
+
+</div>
+
+</div>
+
+
+<!-- MAP -->
+
+<div
+id="map"
+class="section">
+
+<h2 class="section-title">
+🗺️ Идоракунии харита
+</h2>
+
+<div class="card">
+
+<p>
+📍 Дар ин ҷо баъдтар
+идоракунии нуқтаҳои карта,
+рангҳо ва қабатҳои обу ҳаворо
+илова мекунем.
+</p>
+
+</div>
+
+</div>
+
+
+<!-- USERS -->
+
+<div
+id="users"
+class="section">
+
+<h2 class="section-title">
+👥 Корбарон
+</h2>
+
+<div class="card">
+
+<p>
+Ҳоло корбарон вуҷуд надоранд.
+</p>
+
+</div>
+
+</div>
+
+
+<!-- SETTINGS -->
+
+<div
+id="settings"
+class="section">
+
+<h2 class="section-title">
+⚙️ Танзимот
+</h2>
+
+
+<div class="settings">
+
+<div class="setting">
+
+<span>
+🌡️ Воҳиди ҳарорат
+</span>
+
+<button
+onclick="changeUnit()">
+
+°C
+
+</button>
+
+</div>
+
+
+<div class="setting">
+
+<span>
+📅 Пешгӯӣ
+</span>
+
+<b>
+14 рӯз
+</b>
+
+</div>
+
+
+<div class="setting">
+
+<span>
+🌍 Забон
+</span>
+
+<b>
+Тоҷикӣ
+</b>
+
+</div>
+
+</div>
+
+</div>
+
+
+</div>
+
+
+<script>
+
+/* =========================
+   DATA
+========================= */
+
+let cities = [
+
+{
+name:"Душанбе",
+country:"Тоҷикистон",
+lat:38.5598,
+lon:68.7870
+},
+
+{
+name:"Тошканд",
+country:"Ӯзбекистон",
+lat:41.2995,
+lon:69.2401
+},
+
+{
+name:"Лондон",
+country:"Британия",
+lat:51.5074,
+lon:-0.1278
+},
+
+{
+name:"Москва",
+country:"Русия",
+lat:55.7558,
+lon:37.6173
+},
+
+{
+name:"Париж",
+country:"Фаронса",
+lat:48.8566,
+lon:2.3522
+}
+
+];
+
+
+let searchCount = 0;
+
+
+/* =========================
+   MENU
+========================= */
+
+function showSection(
+id,
+button
+){
+
+document
+.querySelectorAll(".section")
+.forEach(
+el =>
+el.classList.remove("active")
+);
+
+
+document
+.getElementById(id)
+.classList.add("active");
+
+
+document
+.querySelectorAll(".menu button")
+.forEach(
+el =>
+el.classList.remove("active")
+);
+
+
+button.classList.add("active");
+
+
+let titles = {
+
+dashboard:"📊 Dashboard",
+
+cities:"🌍 Шаҳрҳо",
+
+map:"🗺️ Харита",
+
+users:"👥 Корбарон",
+
+settings:"⚙️ Танзимот"
+
+};
+
+
+document.getElementById(
+"pageTitle"
+).innerText =
+titles[id];
+
+}
+
+
+/* =========================
+   CITY TABLE
+========================= */
+
+function renderCities(){
+
+let table =
+document.getElementById(
+"cityTable"
+);
+
+table.innerHTML="";
+
+
+cities.forEach(
+(city,index)=>{
+
+table.innerHTML += `
+
+<tr>
+
+<td>
+${city.name}
+</td>
+
+<td>
+${city.country}
+</td>
+
+<td>
+${city.lat}
+</td>
+
+<td>
+${city.lon}
+</td>
+
+<td>
+
+<button
+class="delete"
+onclick="deleteCity(${index})">
+
+🗑️
+
+</button>
+
+</td>
+
+</tr>
+
+`;
+
+});
+
+
+document.getElementById(
+"cityCount"
+).innerText =
+cities.length;
+
+}
+
+
+/* =========================
+   ADD CITY
+========================= */
+
+function addCity(){
+
+let name =
+document.getElementById(
+"cityName"
+).value.trim();
+
+let country =
+document.getElementById(
+"cityCountry"
+).value.trim();
+
+let lat =
+parseFloat(
+document.getElementById(
+"cityLat"
+).value
+);
+
+let lon =
+parseFloat(
+document.getElementById(
+"cityLon"
+).value
+);
+
+
+if(
+!name ||
+!country ||
+isNaN(lat) ||
+isNaN(lon)
+){
+
+alert(
+"Ҳамаи майдонҳоро пур кун."
+);
+
+return;
+
+}
+
+
+cities.push({
+
+name:name,
+
+country:country,
+
+lat:lat,
+
+lon:lon
+
+});
+
+
+document.getElementById(
+"cityName"
+).value="";
+
+document.getElementById(
+"cityCountry"
+).value="";
+
+document.getElementById(
+"cityLat"
+).value="";
+
+document.getElementById(
+"cityLon"
+).value="";
+
+
+renderCities();
+
+}
+
+
+/* =========================
+   DELETE
+========================= */
+
+function deleteCity(index){
+
+if(
+confirm(
+"Ин шаҳрро нест кунем?"
+)
+){
+
+cities.splice(
+index,
+1
+);
+
+renderCities();
+
+}
+
+}
+
+
+/* =========================
+   UNIT
+========================= */
+
+function changeUnit(){
+
+alert(
+"Баъдтар °C / °F илова мекунем."
+);
+
+}
+
+
+/* =========================
+   START
+========================= */
+
+renderCities();
+
+</script>
+
+</body>
+</html>

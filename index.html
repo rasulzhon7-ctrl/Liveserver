@@ -1,0 +1,2094 @@
+```html
+<!DOCTYPE html>
+<html lang="tg">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+
+<title>Weather World 🌍</title>
+
+<link rel="stylesheet"
+href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+
+<style>
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:Arial,sans-serif;
+}
+
+body{
+    min-height:100vh;
+    color:white;
+    overflow-x:hidden;
+    background:
+    radial-gradient(circle at 10% 10%,#00e5ff55,transparent 30%),
+    radial-gradient(circle at 90% 20%,#7b2cff55,transparent 30%),
+    linear-gradient(135deg,#06152f,#087f9f,#06345f);
+}
+
+.top-bar{
+    position:fixed;
+    top:0;
+    left:0;
+    width:100%;
+    height:70px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:0 25px;
+    background:#04152ff2;
+    backdrop-filter:blur(15px);
+    z-index:5000;
+}
+
+.weather-logo{
+    font-size:22px;
+    font-weight:bold;
+}
+
+.register-top-btn{
+    padding:12px 22px;
+    border:0;
+    border-radius:13px;
+    background:#00eaff;
+    color:#00303b;
+    font-size:16px;
+    font-weight:bold;
+    cursor:pointer;
+}
+
+header{
+    text-align:center;
+    padding:105px 15px 20px;
+}
+
+header h1{
+    font-size:42px;
+    text-shadow:0 5px 25px #0009;
+}
+
+header p{
+    margin-top:8px;
+    opacity:.8;
+}
+
+.search{
+    width:94%;
+    max-width:900px;
+    margin:12px auto;
+    display:flex;
+    gap:10px;
+    position:relative;
+    z-index:20;
+}
+
+.search input{
+    flex:1;
+    padding:18px 20px;
+    border:0;
+    outline:none;
+    border-radius:18px;
+    font-size:17px;
+}
+
+.search button{
+    padding:0 28px;
+    border:0;
+    border-radius:18px;
+    background:#00eaff;
+    color:#00303b;
+    font-size:16px;
+    font-weight:bold;
+    cursor:pointer;
+}
+
+.search-results{
+    width:94%;
+    max-width:900px;
+    margin:0 auto 18px;
+    display:none;
+    max-height:260px;
+    overflow-y:auto;
+    position:relative;
+    z-index:30;
+}
+
+.result{
+    padding:15px 20px;
+    margin:6px 0;
+    border-radius:15px;
+    background:#071f3df2;
+    cursor:pointer;
+}
+
+.result:hover{
+    background:#00b9d555;
+}
+
+.map-box{
+    position:relative;
+    width:94%;
+    margin:auto;
+}
+
+#map{
+    width:100%;
+    height:500px;
+    border-radius:25px;
+    overflow:hidden;
+    box-shadow:0 15px 45px #0009;
+}
+
+.map-buttons{
+    position:absolute;
+    z-index:1000;
+    top:15px;
+    right:15px;
+    display:flex;
+    gap:8px;
+}
+
+.map-buttons button{
+    border:0;
+    padding:11px 15px;
+    border-radius:12px;
+    background:#ffffffee;
+    color:#123;
+    font-weight:bold;
+    cursor:pointer;
+}
+
+.weather-marker{
+    width:46px;
+    height:46px;
+    border-radius:50%;
+    background:#ffffffee;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    font-size:25px;
+    border:2px solid #00dfff;
+    box-shadow:0 4px 12px #0008;
+}
+
+.location-btn{
+    display:block;
+    margin:15px auto;
+    padding:14px 25px;
+    border:0;
+    border-radius:15px;
+    background:#00eaff;
+    color:#00303b;
+    font-weight:bold;
+    cursor:pointer;
+}
+
+.panel{
+    width:94%;
+    max-width:1200px;
+    margin:20px auto 50px;
+    padding:28px;
+    border-radius:25px;
+    background:#ffffff18;
+    backdrop-filter:blur(18px);
+    box-shadow:0 10px 35px #0005;
+}
+
+.loading{
+    text-align:center;
+    padding:25px;
+}
+
+.weather{
+    display:none;
+    text-align:center;
+}
+
+.big-icon{
+    font-size:75px;
+}
+
+.city{
+    font-size:30px;
+    font-weight:bold;
+}
+
+.temperature{
+    font-size:60px;
+    font-weight:bold;
+}
+
+.condition{
+    font-size:20px;
+    opacity:.85;
+}
+
+.stats{
+    display:flex;
+    justify-content:center;
+    flex-wrap:wrap;
+    gap:12px;
+    margin:22px 0;
+}
+
+.stat{
+    min-width:160px;
+    background:#ffffff16;
+    padding:16px;
+    border-radius:16px;
+}
+
+h2{
+    margin-top:30px;
+}
+
+.hourly{
+    display:flex;
+    gap:12px;
+    overflow-x:auto;
+    margin-top:18px;
+    padding-bottom:10px;
+}
+
+.hour{
+    min-width:125px;
+    padding:18px 12px;
+    border-radius:20px;
+    background:#ffffff13;
+    text-align:center;
+}
+
+.hour-icon{
+    font-size:38px;
+    margin:10px;
+}
+
+.hour-temp{
+    font-size:22px;
+    font-weight:bold;
+}
+
+.parts{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:12px;
+    margin-top:18px;
+}
+
+.part{
+    padding:20px 12px;
+    border-radius:20px;
+    background:#ffffff13;
+    text-align:center;
+}
+
+.part-icon{
+    font-size:35px;
+    margin:10px;
+}
+
+.part-temp{
+    font-size:22px;
+    font-weight:bold;
+}
+
+.forecast{
+    display:flex;
+    gap:12px;
+    overflow-x:auto;
+    margin-top:18px;
+}
+
+.day{
+    min-width:145px;
+    padding:17px 10px;
+    border-radius:18px;
+    background:#ffffff16;
+    text-align:center;
+}
+
+.day-icon{
+    font-size:40px;
+    margin:12px;
+}
+
+.max{
+    font-weight:bold;
+}
+
+.min{
+    opacity:.7;
+}
+
+.extra-grid{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:14px;
+    margin-top:18px;
+}
+
+.extra{
+    padding:18px;
+    border-radius:18px;
+    background:#ffffff13;
+    text-align:left;
+}
+
+.extra-title{
+    opacity:.7;
+    font-size:14px;
+}
+
+.extra-value{
+    font-size:20px;
+    font-weight:bold;
+    margin-top:7px;
+}
+
+#registerModal{
+    position:fixed;
+    inset:0;
+    display:none;
+    justify-content:center;
+    align-items:center;
+    background:#000b;
+    z-index:10000;
+    padding:20px;
+}
+
+.register-box{
+    position:relative;
+    width:90%;
+    max-width:400px;
+    padding:35px 30px;
+    border-radius:25px;
+    background:linear-gradient(160deg,#08294f,#087ca8);
+    text-align:center;
+    box-shadow:0 20px 70px #0009;
+}
+
+.close-x{
+    position:absolute;
+    top:12px;
+    right:15px;
+    width:35px;
+    height:35px;
+    border:0;
+    border-radius:50%;
+    background:#ffffff22;
+    color:white;
+    cursor:pointer;
+    font-size:18px;
+}
+
+.register-icon{
+    width:75px;
+    height:75px;
+    margin:auto;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    border-radius:50%;
+    background:#00bfff;
+    font-size:38px;
+}
+
+.register-box h2{
+    margin-top:15px;
+}
+
+.register-box p{
+    opacity:.8;
+    margin:10px 0 22px;
+}
+
+.google-btn{
+    width:100%;
+    height:52px;
+    border:0;
+    border-radius:13px;
+    font-size:16px;
+    font-weight:bold;
+    cursor:pointer;
+    background:white;
+    color:#333;
+    transition:.2s;
+}
+
+.google-btn:hover{
+    transform:scale(1.02);
+}
+
+.google-logo{
+    display:inline-flex;
+    width:28px;
+    height:28px;
+    align-items:center;
+    justify-content:center;
+    border-radius:50%;
+    margin-right:8px;
+    font-size:18px;
+    font-weight:bold;
+}
+
+.normal-register,
+.finish-btn{
+    width:100%;
+    height:52px;
+    border:0;
+    border-radius:13px;
+    font-size:16px;
+    font-weight:bold;
+    cursor:pointer;
+    background:#00eaff;
+    color:#00303b;
+}
+
+.or{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    margin:20px 0;
+    opacity:.7;
+}
+
+.or span{
+    flex:1;
+    height:1px;
+    background:#ffffff55;
+}
+
+#registerForm{
+    display:none;
+    margin-top:15px;
+}
+
+#registerForm input{
+    width:100%;
+    padding:14px;
+    margin:6px 0;
+    border:0;
+    outline:none;
+    border-radius:12px;
+    font-size:15px;
+}
+
+.finish-btn{
+    margin-top:10px;
+}
+
+#userBox{
+    display:none;
+    margin-top:15px;
+    padding:18px;
+    border-radius:15px;
+    background:#ffffff15;
+}
+
+.user-name{
+    font-size:20px;
+    font-weight:bold;
+}
+
+.user-email{
+    opacity:.7;
+    margin:5px 0 15px;
+}
+
+.logout-btn{
+    border:0;
+    padding:10px 18px;
+    border-radius:10px;
+    background:#ff5b5b;
+    color:white;
+    cursor:pointer;
+}
+
+#weatherEffect{
+    position:fixed;
+    inset:0;
+    pointer-events:none;
+    z-index:9999;
+    overflow:hidden;
+}
+
+.rain{
+    position:absolute;
+    width:2px;
+    height:20px;
+    background:#bcecff;
+    animation:rain linear infinite;
+    opacity:.5;
+}
+
+@keyframes rain{
+    from{transform:translateY(-40px)}
+    to{transform:translateY(110vh)}
+}
+
+.snow{
+    position:absolute;
+    color:white;
+    animation:snow linear infinite;
+}
+
+@keyframes snow{
+    from{transform:translateY(-40px)}
+    to{transform:translateY(110vh)}
+}
+
+.sun-effect{
+    position:absolute;
+    width:250px;
+    height:250px;
+    border-radius:50%;
+    background:#ffd83d55;
+    filter:blur(40px);
+    top:10%;
+    right:8%;
+}
+
+@media(max-width:800px){
+    .parts{
+        grid-template-columns:repeat(2,1fr);
+    }
+
+    .extra-grid{
+        grid-template-columns:repeat(2,1fr);
+    }
+}
+
+@media(max-width:600px){
+
+    header h1{
+        font-size:29px;
+    }
+
+    .search{
+        flex-direction:column;
+    }
+
+    .search button{
+        padding:15px;
+    }
+
+    #map{
+        height:390px;
+    }
+
+    .panel{
+        padding:20px 12px;
+    }
+
+    .temperature{
+        font-size:50px;
+    }
+
+    .extra-grid{
+        grid-template-columns:1fr;
+    }
+
+    .top-bar{
+        padding:0 12px;
+    }
+
+    .weather-logo{
+        font-size:17px;
+    }
+
+    .register-top-btn{
+        padding:10px 13px;
+        font-size:13px;
+    }
+
+    .map-buttons{
+        flex-direction:column;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<div id="weatherEffect"></div>
+
+<div class="top-bar">
+
+    <div class="weather-logo">
+        🌍 Weather World
+    </div>
+
+    <button
+        class="register-top-btn"
+        onclick="openRegister()">
+        Регистрация
+    </button>
+
+</div>
+
+<header>
+
+    <h1>🌍 Weather World</h1>
+
+    <p>Обу ҳавои тамоми ҷаҳон</p>
+
+</header>
+
+<div class="search">
+
+    <input
+        id="searchInput"
+        type="text"
+        placeholder="🔍 Номи давлатро навис..."
+        autocomplete="off">
+
+    <button onclick="searchCountry()">
+        🔎 Ҷустуҷӯ
+    </button>
+
+</div>
+
+<div id="searchResults" class="search-results"></div>
+
+<div class="map-box">
+
+    <div class="map-buttons">
+
+        <button onclick="normalMap()">
+            🗺️ Map
+        </button>
+
+        <button onclick="satelliteMap()">
+            🛰️ Satellite
+        </button>
+
+        <button onclick="toggleRadar()" id="radarBtn">
+            🌧️ Radar
+        </button>
+
+    </div>
+
+    <div id="map"></div>
+
+</div>
+
+<button
+    class="location-btn"
+    onclick="myLocation()">
+    📍 Ҷойгиршавии ман
+</button>
+
+<div class="panel">
+
+    <div id="loading" class="loading">
+        ⏳ Обу ҳаво бор шуда истодааст...
+    </div>
+
+    <div id="weather" class="weather">
+
+        <div id="weatherIcon" class="big-icon">
+            ☀️
+        </div>
+
+        <div id="city" class="city">
+            Тоҷикистон
+        </div>
+
+        <div id="temperature" class="temperature">
+            --°C
+        </div>
+
+        <div id="condition" class="condition">
+            --
+        </div>
+
+        <div class="stats">
+
+            <div class="stat">
+                💨 Шамол:
+                <b id="wind">--</b> km/h
+            </div>
+
+            <div class="stat">
+                💧 Намнокӣ:
+                <b id="humidity">--</b>%
+            </div>
+
+            <div class="stat">
+                🌡️ Ҳис мешавад:
+                <b id="feels">--</b>°C
+            </div>
+
+            <div class="stat">
+                ☁️ Абрнокӣ:
+                <b id="cloud">--</b>%
+            </div>
+
+        </div>
+
+        <h2>⏰ Обу ҳаво соатбай</h2>
+
+        <div id="hourly" class="hourly"></div>
+
+        <h2>🌅 Субҳ • Рӯз • Шом • Шаб</h2>
+
+        <div class="parts">
+
+            <div class="part">
+                🌅 Субҳ
+                <div class="part-icon">🌤️</div>
+                <div id="morningTemp" class="part-temp">--°C</div>
+            </div>
+
+            <div class="part">
+                ☀️ Рӯз
+                <div class="part-icon">☀️</div>
+                <div id="dayTemp" class="part-temp">--°C</div>
+            </div>
+
+            <div class="part">
+                🌇 Шом
+                <div class="part-icon">🌇</div>
+                <div id="eveningTemp" class="part-temp">--°C</div>
+            </div>
+
+            <div class="part">
+                🌙 Шаб
+                <div class="part-icon">🌙</div>
+                <div id="nightTemp" class="part-temp">--°C</div>
+            </div>
+
+        </div>
+
+        <h2>📅 Пешгӯии 14 рӯз</h2>
+
+        <div id="forecast" class="forecast"></div>
+
+        <h2>📊 Маълумоти иловагӣ</h2>
+
+        <div class="extra-grid">
+
+            <div class="extra">
+                <div class="extra-title">🧭 Самти шамол</div>
+                <div id="windDirection" class="extra-value">--</div>
+            </div>
+
+            <div class="extra">
+                <div class="extra-title">🌧️ Боришот</div>
+                <div id="rain" class="extra-value">--</div>
+            </div>
+
+            <div class="extra">
+                <div class="extra-title">🌫️ Намоёнӣ</div>
+                <div id="visibility" class="extra-value">--</div>
+            </div>
+
+            <div class="extra">
+                <div class="extra-title">🧪 Фишори ҳаво</div>
+                <div id="pressure" class="extra-value">--</div>
+            </div>
+
+            <div class="extra">
+                <div class="extra-title">🌊 Нуқтаи шабнам</div>
+                <div id="dewpoint" class="extra-value">--</div>
+            </div>
+
+            <div class="extra">
+                <div class="extra-title">☀️ UV Index</div>
+                <div id="uv" class="extra-value">--</div>
+            </div>
+
+            <div class="extra">
+                <div class="extra-title">🌅 Тулӯи офтоб</div>
+                <div id="sunrise" class="extra-value">--</div>
+            </div>
+
+            <div class="extra">
+                <div class="extra-title">🌇 Ғуруби офтоб</div>
+                <div id="sunset" class="extra-value">--</div>
+            </div>
+
+            <div class="extra">
+                <div class="extra-title">👕 Маслиҳат</div>
+                <div id="clothes" class="extra-value">--</div>
+            </div>
+
+        </div>
+
+        <div
+            id="weatherAlert"
+            style="margin-top:20px;padding:18px;border-radius:18px;background:#ffffff12">
+            ℹ️ Ҳоло огоҳии махсус нест.
+        </div>
+
+    </div>
+</div>
+
+<!-- REGISTRATION -->
+
+<div id="registerModal">
+
+    <div class="register-box">
+
+        <button
+            class="close-x"
+            onclick="closeRegister()">
+            ✕
+        </button>
+
+        <div class="register-icon">
+            🌍
+        </div>
+
+        <h2>Добро пожаловать!</h2>
+
+        <p>
+            Войдите или создайте аккаунт
+        </p>
+
+        <button
+            class="google-btn"
+            onclick="googleLogin()">
+
+            <span class="google-logo">G</span>
+
+            Продолжить с Google
+
+        </button>
+
+        <div class="or">
+            <span></span>
+            или
+            <span></span>
+        </div>
+
+        <button
+            class="normal-register"
+            onclick="showForm()">
+
+            Зарегистрироваться
+
+        </button>
+
+        <div id="registerForm">
+
+            <input
+                id="regName"
+                type="text"
+                placeholder="Ваше имя">
+
+            <input
+                id="regEmail"
+                type="email"
+                placeholder="Email">
+
+            <input
+                id="regPassword"
+                type="password"
+                placeholder="Пароль">
+
+            <button
+                class="finish-btn"
+                onclick="registerUser()">
+
+                Создать аккаунт
+
+            </button>
+
+        </div>
+
+        <div id="userBox">
+
+            <div
+                class="user-name"
+                id="userName">
+            </div>
+
+            <div
+                class="user-email"
+                id="userEmail">
+            </div>
+
+            <button
+                class="logout-btn"
+                onclick="logoutUser()">
+
+                Выйти
+
+            </button>
+
+        </div>
+
+    </div>
+</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+<script>
+
+/* =========================
+   COUNTRIES
+========================= */
+
+const countries = [
+
+["Тоҷикистон",38.5598,68.7870],
+["Ӯзбекистон",41.2995,69.2401],
+["Қирғизистон",42.8746,74.5698],
+["Қазоқистон",51.1694,71.4491],
+["Россия",55.7558,37.6173],
+["Чин",39.9042,116.4074],
+["Афғонистон",34.5553,69.2075],
+["Покистон",33.6844,73.0479],
+["Ҳиндустон",28.6139,77.2090],
+["Эрон",35.6892,51.3890],
+["Туркия",39.9334,32.8597],
+["Арабистони Саудӣ",24.7136,46.6753],
+["АМА",25.2048,55.2708],
+
+["Германия",52.5200,13.4050],
+["Фаронса",48.8566,2.3522],
+["Италия",41.9028,12.4964],
+["Испания",40.4168,-3.7038],
+["Британия",51.5074,-0.1278],
+["Норвегия",59.9139,10.7522],
+["Шветсия",59.3293,18.0686],
+["Финландия",60.1699,24.9384],
+["Украина",50.4501,30.5234],
+["Беларус",53.9045,27.5615],
+
+["ИМА",38.9072,-77.0369],
+["Канада",45.4215,-75.6972],
+["Мексика",19.4326,-99.1332],
+["Бразилия",-15.7939,-47.8828],
+["Аргентина",-34.6037,-58.3816],
+["Чили",-33.4489,-70.6693],
+["Перу",-12.0464,-77.0428],
+
+["Миср",30.0444,31.2357],
+["Марокаш",34.0209,-6.8416],
+["Алҷазоир",36.7538,3.0588],
+["Кения",-1.2864,36.8172],
+["Нигерия",9.0765,7.3986],
+["Африқои Ҷанубӣ",-30.5595,22.9375],
+
+["Ҷопон",35.6762,139.6503],
+["Кореяи Ҷанубӣ",37.5665,126.9780],
+["Таиланд",13.7563,100.5018],
+["Ветнам",21.0278,105.8342],
+["Малайзия",3.1390,101.6869],
+["Сингапур",1.3521,103.8198],
+["Индонезия",-6.2088,106.8456],
+["Австралия",-35.2809,149.1300],
+["Зеландияи Нав",-41.2866,174.7762]
+
+];
+
+/* =========================
+   MAP
+========================= */
+
+const map=L.map("map").setView([25,20],3);
+
+const normalLayer=L.tileLayer(
+"https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+{
+maxZoom:19,
+attribution:"© OpenStreetMap"
+}
+).addTo(map);
+
+const satelliteLayer=L.tileLayer(
+"https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
+{
+maxZoom:19,
+attribution:"© Esri"
+}
+);
+
+function normalMap(){
+
+if(!map.hasLayer(normalLayer))
+map.addLayer(normalLayer);
+
+if(map.hasLayer(satelliteLayer))
+map.removeLayer(satelliteLayer);
+
+}
+
+function satelliteMap(){
+
+if(!map.hasLayer(satelliteLayer))
+map.addLayer(satelliteLayer);
+
+if(map.hasLayer(normalLayer))
+map.removeLayer(normalLayer);
+
+}
+
+/* =========================
+   MARKERS
+========================= */
+
+const markers={};
+
+countries.forEach(country=>{
+
+const icon=L.divIcon({
+className:"weather-marker",
+html:"🌤️",
+iconSize:[46,46],
+iconAnchor:[23,23]
+});
+
+const marker=L.marker(
+[country[1],country[2]],
+{icon}
+).addTo(map);
+
+marker.bindPopup(`
+<div style="text-align:center;color:#111">
+
+<h3>🌍 ${country[0]}</h3>
+
+<button
+onclick="selectCountry('${country[0]}')"
+style="
+padding:9px 16px;
+border:0;
+border-radius:9px;
+background:#08a9c9;
+color:white;
+cursor:pointer">
+
+Обу ҳаво
+
+</button>
+
+</div>
+`);
+
+markers[country[0]]=marker;
+
+loadMarkerWeather(
+country[1],
+country[2],
+marker
+);
+
+});
+
+async function loadMarkerWeather(lat,lon,marker){
+
+try{
+
+const response=await fetch(
+`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=weather_code`
+);
+
+const data=await response.json();
+
+const info=weatherInfo(
+data.current.weather_code
+);
+
+marker.setIcon(
+L.divIcon({
+className:"weather-marker",
+html:info.icon,
+iconSize:[46,46],
+iconAnchor:[23,23]
+})
+);
+
+}catch(e){}
+
+}
+
+/* =========================
+   SEARCH
+========================= */
+
+const searchInput=document.getElementById("searchInput");
+const searchResults=document.getElementById("searchResults");
+
+searchInput.addEventListener("input",()=>{
+
+const text=searchInput.value.trim().toLowerCase();
+
+searchResults.innerHTML="";
+
+if(!text){
+
+searchResults.style.display="none";
+return;
+
+}
+
+const results=countries.filter(c=>
+c[0].toLowerCase().includes(text)
+);
+
+if(!results.length){
+
+searchResults.innerHTML=
+`<div class="result">❌ Давлат ёфт нашуд</div>`;
+
+}else{
+
+results.slice(0,15).forEach(c=>{
+
+const div=document.createElement("div");
+
+div.className="result";
+
+div.textContent="🌍 "+c[0];
+
+div.onclick=()=>{
+
+selectCountry(c[0]);
+
+searchInput.value=c[0];
+
+searchResults.style.display="none";
+
+};
+
+searchResults.appendChild(div);
+
+});
+
+}
+
+searchResults.style.display="block";
+
+});
+
+function searchCountry(){
+
+const text=searchInput.value.trim().toLowerCase();
+
+const country=countries.find(c=>
+c[0].toLowerCase().includes(text)
+);
+
+if(!country){
+
+alert("❌ Давлат ёфт нашуд");
+return;
+
+}
+
+selectCountry(country[0]);
+
+searchResults.style.display="none";
+
+}
+
+searchInput.addEventListener("keydown",e=>{
+
+if(e.key==="Enter")
+searchCountry();
+
+});
+
+/* =========================
+   SELECT COUNTRY
+========================= */
+
+function selectCountry(name){
+
+const country=countries.find(c=>c[0]===name);
+
+if(!country)return;
+
+map.setView(
+[country[1],country[2]],
+5
+);
+
+if(markers[name])
+markers[name].openPopup();
+
+loadWeather(
+country[1],
+country[2],
+name
+);
+
+}
+
+/* =========================
+   WEATHER
+========================= */
+
+async function loadWeather(lat,lon,name){
+
+const loading=document.getElementById("loading");
+const weather=document.getElementById("weather");
+
+loading.style.display="block";
+weather.style.display="none";
+
+loading.textContent=
+"⏳ Обу ҳавои "+name+" гирифта шуда истодааст...";
+
+try{
+
+const url=
+`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,relative_humidity_2m,apparent_temperature,weather_code,wind_speed_10m,wind_direction_10m,cloud_cover,pressure_msl,visibility,dew_point_2m&hourly=temperature_2m,weather_code,wind_speed_10m,precipitation_probability&daily=weather_code,temperature_2m_max,temperature_2m_min,uv_index_max,sunrise,sunset,precipitation_sum&forecast_days=14&timezone=auto`;
+
+const response=await fetch(url);
+
+if(!response.ok)
+throw new Error();
+
+const data=await response.json();
+
+showWeather(data,name);
+
+}catch(e){
+
+loading.textContent=
+"❌ Хатогӣ. Интернетро санҷ.";
+
+}
+
+}
+
+/* =========================
+   SHOW WEATHER
+========================= */
+
+function showWeather(data,name){
+
+document.getElementById("loading").style.display="none";
+document.getElementById("weather").style.display="block";
+
+const c=data.current;
+
+const info=weatherInfo(c.weather_code);
+
+document.getElementById("weatherIcon").textContent=info.icon;
+
+document.getElementById("city").textContent="📍 "+name;
+
+document.getElementById("temperature").textContent=
+Math.round(c.temperature_2m)+"°C";
+
+document.getElementById("condition").textContent=info.text;
+
+document.getElementById("wind").textContent=
+Math.round(c.wind_speed_10m);
+
+document.getElementById("humidity").textContent=
+c.relative_humidity_2m;
+
+document.getElementById("feels").textContent=
+Math.round(c.apparent_temperature);
+
+document.getElementById("cloud").textContent=
+c.cloud_cover;
+
+document.getElementById("windDirection").textContent=
+windDirection(c.wind_direction_10m);
+
+document.getElementById("rain").textContent=
+data.daily.precipitation_sum[0]+" mm";
+
+document.getElementById("visibility").textContent=
+Math.round(c.visibility/1000)+" km";
+
+document.getElementById("pressure").textContent=
+Math.round(c.pressure_msl)+" hPa";
+
+document.getElementById("dewpoint").textContent=
+Math.round(c.dew_point_2m)+"°C";
+
+document.getElementById("uv").textContent=
+data.daily.uv_index_max[0];
+
+document.getElementById("sunrise").textContent=
+formatTime(data.daily.sunrise[0]);
+
+document.getElementById("sunset").textContent=
+formatTime(data.daily.sunset[0]);
+
+document.getElementById("clothes").textContent=
+clothesAdvice(c.temperature_2m,c.weather_code);
+
+createHourly(data);
+createParts(data);
+createForecast(data);
+
+createAlert(
+c.weather_code,
+c.wind_speed_10m,
+c.temperature_2m
+);
+
+startWeatherEffect(c.weather_code);
+
+}
+
+/* =========================
+   HOURLY
+========================= */
+
+function createHourly(data){
+
+const box=document.getElementById("hourly");
+
+box.innerHTML="";
+
+const now=new Date();
+
+let start=data.hourly.time.findIndex(
+t=>new Date(t)>=now
+);
+
+if(start<0)start=0;
+
+for(
+let i=start;
+i<Math.min(start+24,data.hourly.time.length);
+i++
+){
+
+const info=weatherInfo(
+data.hourly.weather_code[i]
+);
+
+const time=new Date(
+data.hourly.time[i]
+).toLocaleTimeString(
+"tg-TJ",
+{
+hour:"2-digit",
+minute:"2-digit"
+}
+);
+
+const card=document.createElement("div");
+
+card.className="hour";
+
+card.innerHTML=`
+
+<div>
+${i===start?"ҲОЗИР":time}
+</div>
+
+<div class="hour-icon">
+${info.icon}
+</div>
+
+<div class="hour-temp">
+${Math.round(data.hourly.temperature_2m[i])}°C
+</div>
+
+<div>
+${info.text}
+</div>
+
+<div>
+💨 ${Math.round(data.hourly.wind_speed_10m[i])} km/h
+</div>
+
+<div>
+🌧️ ${Math.round(data.hourly.precipitation_probability[i])}%
+</div>
+
+`;
+
+box.appendChild(card);
+
+}
+
+}
+
+/* =========================
+   PARTS
+========================= */
+
+function createParts(data){
+
+const temps=data.hourly.temperature_2m;
+
+const now=new Date();
+
+let start=data.hourly.time.findIndex(
+t=>new Date(t)>=now
+);
+
+if(start<0)start=0;
+
+function avg(a,b){
+
+let arr=temps.slice(
+start+a,
+Math.min(start+b+1,temps.length)
+);
+
+if(!arr.length)return "--";
+
+return Math.round(
+arr.reduce((x,y)=>x+y,0)/arr.length
+);
+
+}
+
+document.getElementById("morningTemp")
+.textContent=avg(0,3)+"°C";
+
+document.getElementById("dayTemp")
+.textContent=avg(4,9)+"°C";
+
+document.getElementById("eveningTemp")
+.textContent=avg(10,14)+"°C";
+
+document.getElementById("nightTemp")
+.textContent=avg(15,20)+"°C";
+
+}
+
+/* =========================
+   FORECAST
+========================= */
+
+function createForecast(data){
+
+const box=document.getElementById("forecast");
+
+box.innerHTML="";
+
+for(let i=0;i<data.daily.time.length;i++){
+
+const info=weatherInfo(
+data.daily.weather_code[i]
+);
+
+const day=new Date(
+data.daily.time[i]
+).toLocaleDateString(
+"tg-TJ",
+{
+weekday:"short",
+day:"numeric",
+month:"short"
+}
+);
+
+const card=document.createElement("div");
+
+card.className="day";
+
+card.innerHTML=`
+
+<div>${day}</div>
+
+<div class="day-icon">
+${info.icon}
+</div>
+
+<div>${info.text}</div>
+
+<br>
+
+<div class="max">
+🔥 ${Math.round(
+data.daily.temperature_2m_max[i]
+)}°C
+</div>
+
+<div class="min">
+❄️ ${Math.round(
+data.daily.temperature_2m_min[i]
+)}°C
+</div>
+
+`;
+
+box.appendChild(card);
+
+}
+
+}
+
+/* =========================
+   WEATHER INFO
+========================= */
+
+function weatherInfo(code){
+
+if(code===0)
+return {icon:"☀️",text:"Офтобӣ"};
+
+if(code===1)
+return {icon:"🌤️",text:"Қисман офтобӣ"};
+
+if(code===2)
+return {icon:"⛅",text:"Қисман абрнок"};
+
+if(code===3)
+return {icon:"☁️",text:"Абрнок"};
+
+if(code===45||code===48)
+return {icon:"🌫️",text:"Туман"};
+
+if(code>=51&&code<=57)
+return {icon:"🌦️",text:"Борони майда"};
+
+if(code>=61&&code<=67)
+return {icon:"🌧️",text:"Борон"};
+
+if(code>=71&&code<=77)
+return {icon:"❄️",text:"Барф"};
+
+if(code>=80&&code<=82)
+return {icon:"🌧️",text:"Борони сахт"};
+
+if(code>=95)
+return {icon:"⛈️",text:"Раъду барқ"};
+
+return {icon:"🌡️",text:"Номаълум"};
+
+}
+
+/* =========================
+   WIND
+========================= */
+
+function windDirection(deg){
+
+if(deg>=337.5||deg<22.5)
+return "⬆️ Шимол";
+
+if(deg<67.5)
+return "↗️ Шимолу шарқ";
+
+if(deg<112.5)
+return "➡️ Шарқ";
+
+if(deg<157.5)
+return "↘️ Ҷанубу шарқ";
+
+if(deg<202.5)
+return "⬇️ Ҷануб";
+
+if(deg<247.5)
+return "↙️ Ҷанубу ғарб";
+
+if(deg<292.5)
+return "⬅️ Ғарб";
+
+return "↖️ Шимолу ғарб";
+
+}
+
+/* =========================
+   TIME
+========================= */
+
+function formatTime(value){
+
+return new Date(value)
+.toLocaleTimeString(
+"tg-TJ",
+{
+hour:"2-digit",
+minute:"2-digit"
+}
+);
+
+}
+
+/* =========================
+   CLOTHES
+========================= */
+
+function clothesAdvice(temp,code){
+
+if(code>=71&&code<=77)
+return "🧥 Либоси гарм";
+
+if(code>=61&&code<=67)
+return "🌂 Куртка + чатр";
+
+if(temp<5)
+return "🧥 Курткаи гарм";
+
+if(temp<15)
+return "🧥 Куртка";
+
+if(temp<22)
+return "👕 Либоси сабук";
+
+if(temp<30)
+return "👕 Футболка";
+
+return "🩳 Либоси хеле сабук";
+
+}
+
+/* =========================
+   ALERT
+========================= */
+
+function createAlert(code,wind,temp){
+
+const box=document.getElementById("weatherAlert");
+
+if(code>=95){
+
+box.innerHTML=
+"⚠️ <b>Огоҳӣ:</b> Раъду барқ эҳтимол дорад.";
+
+return;
+
+}
+
+if(code>=80&&code<=82){
+
+box.innerHTML=
+"🌧️ <b>Огоҳӣ:</b> Бориши сахт эҳтимол дорад.";
+
+return;
+
+}
+
+if(wind>=50){
+
+box.innerHTML=
+"💨 <b>Огоҳӣ:</b> Шамоли сахт.";
+
+return;
+
+}
+
+if(temp>=40){
+
+box.innerHTML=
+"🔥 <b>Огоҳӣ:</b> Ҳарорати хеле баланд.";
+
+return;
+
+}
+
+if(temp<=-10){
+
+box.innerHTML=
+"🥶 <b>Огоҳӣ:</b> Ҳарорати хеле паст.";
+
+return;
+
+}
+
+box.innerHTML=
+"ℹ️ Ҳоло огоҳии махсус нест.";
+
+}
+
+/* =========================
+   EFFECT
+========================= */
+
+function startWeatherEffect(code){
+
+const box=document.getElementById("weatherEffect");
+
+box.innerHTML="";
+
+if(
+(code>=51&&code<=67)||
+(code>=80&&code<=82)
+){
+
+for(let i=0;i<70;i++){
+
+const rain=document.createElement("div");
+
+rain.className="rain";
+
+rain.style.left=
+Math.random()*100+"%";
+
+rain.style.animationDuration=
+(.6+Math.random()*.8)+"s";
+
+rain.style.animationDelay=
+Math.random()*2+"s";
+
+box.appendChild(rain);
+
+}
+
+}
+
+else if(code>=71&&code<=77){
+
+for(let i=0;i<45;i++){
+
+const snow=document.createElement("div");
+
+snow.className="snow";
+
+snow.textContent="❄";
+
+snow.style.left=
+Math.random()*100+"%";
+
+snow.style.fontSize=
+(10+Math.random()*15)+"px";
+
+snow.style.animationDuration=
+(4+Math.random()*5)+"s";
+
+box.appendChild(snow);
+
+}
+
+}
+
+else if(code<=2){
+
+const sun=document.createElement("div");
+
+sun.className="sun-effect";
+
+box.appendChild(sun);
+
+}
+
+}
+
+/* =========================
+   LOCATION
+========================= */
+
+function myLocation(){
+
+if(!navigator.geolocation){
+
+alert("❌ Location дастгирӣ намешавад.");
+return;
+
+}
+
+navigator.geolocation.getCurrentPosition(
+
+position=>{
+
+const lat=position.coords.latitude;
+const lon=position.coords.longitude;
+
+map.setView([lat,lon],8);
+
+L.marker([lat,lon])
+.addTo(map)
+.bindPopup("📍 Ҷойгиршавии шумо")
+.openPopup();
+
+loadWeather(
+lat,
+lon,
+"Ҷойгиршавии ман"
+);
+
+},
+
+()=>{
+
+alert("❌ Ҷойгиршавӣ иҷозат дода нашуд.");
+
+}
+
+);
+
+}
+
+/* =========================
+   RADAR
+========================= */
+
+let radarLayer=null;
+let radarActive=false;
+
+async function toggleRadar(){
+
+const btn=document.getElementById("radarBtn");
+
+if(radarActive){
+
+if(radarLayer)
+map.removeLayer(radarLayer);
+
+radarActive=false;
+
+btn.textContent="🌧️ Radar";
+
+return;
+
+}
+
+try{
+
+btn.textContent="⏳ Radar...";
+
+const response=await fetch(
+"https://api.rainviewer.com/public/weather-maps.json"
+);
+
+const data=await response.json();
+
+if(
+!data.radar ||
+!data.radar.past ||
+!data.radar.past.length
+){
+
+throw new Error();
+
+}
+
+const radar=
+data.radar.past[
+data.radar.past.length-1
+];
+
+const host=
+data.host ||
+"https://tilecache.rainviewer.com"; 
+ 
+radarLayer=L.tileLayer( 
+host+ 
+radar.path+ 
+"/256/{z}/{x}/{y}/2/1_1.png", 
+{ 
+opacity:.6, 
+zIndex:500 
+} 
+).addTo(map); 
+ 
+radarActive=true; 
+ 
+btn.textContent="❌ Radar OFF"; 
+ 
+}catch(e){ 
+ 
+btn.textContent="🌧️ Radar"; 
+ 
+alert("❌ Radar ҳоло дастрас нест."); 
+ 
+} 
+ 
+} 
+ 
+/* ========================= 
+   REGISTRATION 
+========================= */ 
+ 
+function openRegister(){ 
+ 
+document.getElementById( 
+"registerModal" 
+).style.display="flex"; 
+ 
+checkUser(); 
+ 
+} 
+ 
+function closeRegister(){ 
+ 
+document.getElementById( 
+"registerModal" 
+).style.display="none"; 
+ 
+} 
+ 
+/* ========================= 
+   GOOGLE LOGIN 
+========================= */ 
+ 
+/* 
+   ВАЖНО: 
+ 
+   Google Client ID здесь НЕ нужен. 
+ 
+   Client ID и Client Secret находятся 
+   на backend в файле .env. 
+ 
+   При нажатии кнопки пользователь 
+   отправляется на: 
+ 
+   /auth/google 
+*/ 
+ 
+function googleLogin(){ 
+ 
+window.location.href="/auth/google"; 
+ 
+} 
+ 
+/* ========================= 
+   NORMAL REGISTER 
+========================= */ 
+ 
+function showForm(){ 
+ 
+document.getElementById( 
+"registerForm" 
+).style.display="block"; 
+ 
+} 
+ 
+function registerUser(){ 
+ 
+const name= 
+document.getElementById("regName") 
+.value.trim(); 
+ 
+const email= 
+document.getElementById("regEmail") 
+.value.trim(); 
+ 
+const password= 
+document.getElementById("regPassword") 
+.value.trim(); 
+ 
+if(!name||!email||!password){ 
+ 
+alert("Заполните все поля!"); 
+return; 
+ 
+} 
+ 
+localStorage.setItem( 
+"weatherUser", 
+JSON.stringify({ 
+name:name, 
+email:email 
+}) 
+); 
+ 
+closeRegister(); 
+ 
+alert("Аккаунт создан! ✅"); 
+ 
+} 
+ 
+/* ========================= 
+   CHECK USER 
+========================= */ 
+ 
+async function checkUser(){ 
+ 
+try{ 
+ 
+const response=await fetch( 
+"/api/user", 
+{ 
+method:"GET", 
+credentials:"include" 
+} 
+); 
+ 
+if(!response.ok) 
+throw new Error(); 
+ 
+const data=await response.json(); 
+ 
+if(data.loggedIn){ 
+ 
+document.getElementById( 
+"registerForm" 
+).style.display="none"; 
+ 
+document.querySelector( 
+".google-btn" 
+).style.display="none"; 
+ 
+document.querySelector( 
+".normal-register" 
+).style.display="none"; 
+ 
+document.querySelector( 
+".or" 
+).style.display="none"; 
+ 
+document.getElementById( 
+"userBox" 
+).style.display="block"; 
+ 
+document.getElementById( 
+"userName" 
+).textContent= 
+"👤 "+(data.user.name || "Пользователь"); 
+ 
+document.getElementById( 
+"userEmail" 
+).textContent= 
+data.user.email || ""; 
+ 
+}else{ 
+ 
+document.getElementById( 
+"userBox" 
+).style.display="none"; 
+ 
+document.querySelector( 
+".google-btn" 
+).style.display="block"; 
+ 
+document.querySelector( 
+".normal-register" 
+).style.display="block"; 
+ 
+document.querySelector( 
+".or" 
+).style.display="flex"; 
+ 
+} 
+ 
+}catch(e){ 
+ 
+console.log( 
+"Google пользователь пока не авторизован" 
+); 
+ 
+} 
+ 
+} 
+ 
+/* ========================= 
+   LOGOUT 
+========================= */ 
+ 
+function logoutUser(){ 
+ 
+window.location.href="/logout"; 
+ 
+} 
+ 
+/* ========================= 
+   START 
+========================= */ 
+ 
+window.addEventListener( 
+"load", 
+()=>{ 
+ 
+checkUser(); 
+ 
+selectCountry("Тоҷикистон"); 
+ 
+} 
+); 
+ 
+</script> 
+ 
+</body> 
+</html> 
+``` 
